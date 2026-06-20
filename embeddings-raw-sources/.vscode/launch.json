@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "${workspaceFolder}/RAG-tests/venv/bin/python",
+            "program": "${workspaceFolder}/RAG-tests/rag_pipeline.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--repo_path", "/Volumes/T9/lca/cloned_repos",
+                "--embed_location", "/Volumes/T9/all_results/rq1-embeddings/trino_times/gtelarge",
+            ]
+        }
+    ]
+}
