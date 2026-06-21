@@ -1,0 +1,30 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.model_name}_${backbone.experiment}
+  run:
+    dir: /Users/gen/workspace/long-context-experiments/bug_localization/output/swe-bench/${hydra:job.name}${run_suffix} 
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  # Switch to a backbone implementation that uses the Ollama API.
+  _target_: src.baselines.backbones.agent.ollama_agent_backbone.OllamaAgentBackbone
+  name: swe-agent
+  # This is the model identifier as recognized by Ollama.
+  model_name: deepseek-r1-7b-16k
+
+  prompt:
+    _target_: src.baselines.backbones.agent.prompts.agent_context_prompt.AgentContextPrompt
+  retriever: 
+    _target_: src.baselines.backbones.agent.context.summary_retriever_sqlite.SummaryRetrieverSQLite
+    database_location: "/Volumes/T9/chroma_db_summaries_swe/chroma.sqlite3"
+  experiment: ""
+
+data_source:
+  _target_: src.baselines.data_sources.swe_bench_data_source.SWEDataSource 
+  repos_dir: /Volumes/T9/repos
+  cache_dir: null
+  hub_name: /Users/gen/workspace/SWE-bench/swebench/inference/hf_datasets/SWE-bench_Verified
+  split: test
+
+run_suffix: ""

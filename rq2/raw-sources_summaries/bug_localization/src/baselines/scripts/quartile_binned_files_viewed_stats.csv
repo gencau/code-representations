@@ -1,0 +1,17 @@
+dataset,retriever,representation,0 files,Q1: 1–5,Q2: 6–10,Q3: 11–15,Q4: 16–20,short_label
+LCA,Qwen 3,Project structure,0.0,1.3,0.0,0.0,98.7,Qwen 3 • Path
+LCA,Qwen 3,Role-aware summaries,0.0,1.3,0.0,0.0,98.7,Qwen 3 • Sum
+LCA,Qwen 3,Raw sources,0.0,46.0,30.0,12.666666666666668,11.333333333333332,Qwen 3 • Raw
+LCA,Qwen 3,Bug reports,0.0,1.3,0.0,0.0,98.7,Qwen 3 • Bug
+LCA,CodeXEmbed,Project structure,0.0,1.3,0.0,0.0,98.7,CodeXEmbed • Path
+LCA,CodeXEmbed,Role-aware summaries,0.0,1.3,0.0,0.0,98.7,CodeXEmbed • Sum
+LCA,CodeXEmbed,Raw sources,0.0,42.66666666666667,26.0,18.666666666666668,12.666666666666668,CodeXEmbed • Raw
+LCA,CodeXEmbed,Bug reports,0.0,1.3,0.0,0.0,98.7,CodeXEmbed • Bug
+SWE,Qwen 3,Project structure,0.0,0.2,0.0,0.0,99.8,Qwen 3 • Path
+SWE,Qwen 3,Role-aware summaries,0.0,0.2,0.0,0.0,99.8,Qwen 3 • Sum
+SWE,Qwen 3,Raw sources,2.0,84.8,11.4,1.6,0.2,Qwen 3 • Raw
+SWE,Qwen 3,Bug reports,0.0,0.2,0.0,0.0,99.8,Qwen 3 • Bug
+SWE,CodeXEmbed,Project structure,0.0,0.2,0.0,0.0,99.8,CodeXEmbed • Path
+SWE,CodeXEmbed,Role-aware summaries,0.0,0.2,0.0,0.0,99.8,CodeXEmbed • Sum
+SWE,CodeXEmbed,Raw sources,1.2,83.39999999999999,11.8,3.4000000000000004,0.2,CodeXEmbed • Raw
+SWE,CodeXEmbed,Bug reports,0.0,0.2,0.0,0.0,99.8,CodeXEmbed • Bug

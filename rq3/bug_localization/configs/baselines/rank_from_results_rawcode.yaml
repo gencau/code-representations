@@ -1,0 +1,38 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.model_name}_${backbone.type}
+  run:
+    dir: /Users/gen/workspace/filesummaries/long-context-experiments/bug_localization/output/rq3/lca/rawsource/${hydra:job.name}${run_suffix}
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  _target_: src.baselines.backbones.agent.ollama_rank_backbone.OllamaRankBackbone
+  name: lca-ranker
+  # This is the model identifier as recognized by Ollama.
+  model_name: qwen2.5-coder-32b-16k
+  type: rank-w-sources
+
+  prompt:
+    _target_: src.baselines.backbones.agent.prompts.agent_code_prompt.AgentCodePrompt
+  
+  experiment: rank-from-results
+
+data_source:
+  _target_: src.baselines.data_sources.hf_data_source.HFDataSource
+  repos_dir: /Volumes/T9/lca/cloned_repos 
+  cache_dir: null
+  hub_name: tiginamaria/bug-localization
+  configs:
+    - py
+    - java
+    - kt
+  split: test
+
+data_source_results:
+  _target_: src.baselines.data_sources.csv_data_source.CSVDataSource
+  #path: "/Volumes/T9/all_results/rq1-embeddings/filepaths/lca/results_2026-03-11_12-33-24_codexembed.csv"
+  path: "/Volumes/T9/all_results/rq2-llms/lca/base/qwen32/qwen-agent_qwen2.5-coder-32b-16k_rerank_test/results.csv"
+
+run_suffix: "_qwen32b"
+topk: 20

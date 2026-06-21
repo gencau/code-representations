@@ -1,0 +1,103 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Get LLM token counts",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/extract_token_counts.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "args":[
+                "/Volumes/T9/all_results/rq3-ranking/lca/filepaths/lca-ranker_qwen2.5-coder-32b-16k_rank-w-filenames_codexembed/results.csv",
+                "/Volumes/T9/all_results/rq3-ranking/lca/filepaths/lca-ranker_qwen2.5-coder-32b-16k_rank-w-filenames_codexembed/token_counts.csv",
+                "llm"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Get LCA representation token counts",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/count_input_tokens.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "args":[
+                "--source","hf",
+                "--hub_name","tiginamaria/bug-localization",
+                "--repos_dir","/Volumes/T9/lca/cloned_repos",
+                "--split","test",
+                "--output","/Users/gen/workspace/filesummaries/long-context-experiments/bug_localization/results/token_counts/lca/filepaths",
+                "--representation","filepaths",
+                "--configs","py",
+                "--configs","java",
+                "--configs","kt",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "LLM retrieval summaries",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/run_agents.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Combine representations",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/combine_representations.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args":[
+                "--results_list","/Volumes/T9/all_results/rq2-llms/swe/rawsource/qwen32/code-prompting-swe_qwen2.5-coder-32b-16k_raw-code/results.csv,/Volumes/T9/all_results/rq2-llms/lca/base/qwen32/qwen-agent_qwen2.5-coder-32b-16k_rerank_test/results.csv",
+                "--topk", "5",
+                "--method","rrf",
+                "--output","${workspaceFolder}/results/rq2/rrf_raw_path_swe_32b",
+            ]
+        },
+        {
+            "name": "Run ranker with config",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/run_rank_from_results.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run code ranker with config",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bug_localization/src/baselines/run_rank_from_results_rawcode.py",
+            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bug_localization"
+            },
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

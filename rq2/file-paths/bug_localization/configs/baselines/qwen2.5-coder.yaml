@@ -1,0 +1,34 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.ollama_model}_${backbone.experiment}
+  run:
+    dir: /Users/gen/workspace/long-context-experiments/bug_localization/output/${hydra:job.name}${run_suffix}
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  # Switch to a backbone implementation that uses the Ollama API.
+  _target_: src.baselines.backbones.chat.ollama_chat_backbone.OllamaChatBackbone
+  name: qwen2.5-coder-14b
+  # This is the model identifier as recognized by Ollama.
+  ollama_model: qwen2.5-coder-14b-16k
+  # The Ollama server endpoint (adjust if your server is running on a different port/host).
+  ollama_endpoint: http://localhost:11434
+  prompt:
+    _target_: src.baselines.backbones.chat.prompts.chat_file_list_prompt.ChatFileListPrompt
+  parameters:
+    seed: 76097149
+    temperature: 0
+  experiment: project-structure
+data_source:
+  _target_: src.baselines.data_sources.hf_data_source.HFDataSource
+  repos_dir: /Users/gen/workspace/longCodeArena/cloned_repos_test 
+  cache_dir: null
+  hub_name: tiginamaria/bug-localization
+  configs:
+    - py
+    - java
+    - kt
+  split: test
+
+run_suffix: ""

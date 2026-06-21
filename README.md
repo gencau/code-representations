@@ -29,11 +29,76 @@ Scripts are located under embeddings-raw-sources.
 
 The databases with all embeddings for LCA and SWE are located under databases/embeddings.
 
-Example usage: 
+Usage: 
 
 rag_pipeline.py rag_pipeline.py --repo_path <repos_directory> --embed_location <directory where to store the embeddings database>
+
+Example:
+- For LCA: python rag_pipeline.py —datasets=lca —repo_paths=<path to lca sources> —embed_location=<path to embeddings>
+- For SWE: python rag_pipeline.py --datasets=swe_verified --dataset_paths=<path to parquet file>  --repo_path=<path to swe verified sources> --embed_location=<path to embeddings>
+
 
 #### All other representations
 Script are located under embeddings-all/.
 
+Process of adding summaries for an embedding model
 
+We use models from hugging face.
+- Set the path to where you want the database in rag_pipeline.py
+- Set the model you want in record_processor
+- Run: python rag_pipeline.py --datasets=lca --repo_paths=<path to repo>
+- A results file is generated in the results folder with a timestamp.
+- Run python compute_metrics.py --input=results/results_file_name.csv (use the one under llm-embeddings)
+
+Once summaries are generated, we can reuse them from the database to generate new embeddings for other models:
+- Run: python summaries_to_embeddings.py --source-chroma-path <database that has the summaries> —output-chroma-path <path where to store the new embeddings> --model <hugging face model name> —batch_size <specify if the default 32 is too much. For Qwen3, 8 is best>
+- Run: python rag_pipeline.py —datasets=lca --repo_paths=<path to repo> —no_add
+- A results file is generated in the results folder with a timestamp.
+- Run python compute_metrics.py --input=results/results_file_name.csv
+
+Extracting the summaries to file for BM25
+
+- Run python summaries_to_file.py --dataset_name <lca or swe> —chroma_path <database that has the summaries> —output_dir <path to where summaries will be written to files> 
+- From the bm25 project, edit the bm25.yaml file to have the index_location point to where the files were copied (root path). Edit the run_suffix to control the path where the results file will be stored (under the output folder).
+- Run python run_bm25.py
+- Run python metrics/compute_metrics_bm25.py —input <path to results file> —topk=5
+
+## RQ2: LLM-based Retrieval
+
+All scripts for raw sources and summary-based prompting are located under rq2/summaries.
+
+All scripts for file paths prompting are located under rq2/file-paths.
+
+Our 3 models using a 16K context window can be re-created in Ollama by using the configuration files located under bug_localization/src/modelfiles: ollama create -f <path to modelfile>
+
+## RQ3: Post-retrieval Ranking
+
+All scripts are located under rq3.
+
+
+
+
+## Combining Results
+
+Under rq2/raw-sources_summaries: combine_representations.py. Only rrf method is used.
+
+Example:
+python src/baselines/combine_representations.py --results_list=/Volumes/T9/all_results/rq1-embeddings/filepaths/lca/results_2026-03-11_12-59-04_qwen3.csv,/Volumes/T9/all_results/rq1-embeddings/prompt-variations/lca/all/results_2026-01-24_11-22-33-prompt3-qwen3.csv --topk=5 --method=rrf --output=/Volumes/T9/all_results/rq1-embeddings/fused_rankings/lca/rrf_path_sum3
+
+## Analysis of localized files by different methods
+Scripts located under rq2/raw-sources_summaries.
+
+Example:
+python utils/found_files_analysis.py --data-paths=results/raw-code/lca/results_2026-01-25_12-11-42_codexembed_100percent.csv,results/prompt-variations/lca/all/results_2026-01-23_10-16-35-prompt4-codexembed.csv,results/queries/samples-5/no-token-limit/all/results_2026-01-17_09-24-24-prompt3-codexembed.csv --topk=5
+
+## Computing Representation Footprint
+Scripts located under rq2/raw-sources_summaries.
+
+Example for LCA:
+
+python src/baselines/count_input_tokens.py --source hf --hub_name tiginamaria/bug-localization --repos_dir <path to repos> --configs py java kt --split test --output <output location>
+
+## Computing Indexing Times
+Scripts located under rq2/raw-sources_summaries.
+
+python utils/summaries_to_embeddings.py --collection=eaf893a74737d877aeb4e6cd267a8018203a632d --source-chroma-path /Volumes/T9/rq1/summaries/prompt-variations/prompt3-gtelarge --output-chroma-path /Volumes/T9/all_results/rq1-embeddings/trino_times/prompt3/gtelarge --model thenlper/gte-large

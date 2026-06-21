@@ -1,0 +1,35 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.model_name}_${backbone.type}
+  run:
+    dir: /Users/gen/workspace/filesummaries/long-context-experiments/bug_localization/output/rq3/lca/filepaths/${hydra:job.name}${run_suffix}
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  _target_: src.baselines.backbones.agent.ollama_rank_backbone.OllamaRankBackbone
+  name: swe-ranker
+  # This is the model identifier as recognized by Ollama.
+  model_name: qwen2.5-coder-32b-16k
+  # Change this based on the experiment type
+  type: rank-w-filenames
+  retriever: 
+    _target_: src.baselines.backbones.agent.context.summary_retriever.SummaryRetriever
+    #database_location: "/Volumes/T9/rq1/summaries/prompt-variations/prompt2-codexembed/"
+    database_location: "/Volumes/T9/rq1/summaries/queries/file-level/report3/temp0/all/queries_5_test_codexembed"
+
+# Change this: must fit with the backbone type
+  prompt:
+  # Change this based on the experiment type
+    _target_: src.baselines.backbones.agent.prompts.agent_context_prompt.AgentContextPrompt
+  
+  experiment: rank-from-results
+
+data_source:
+  _target_: src.baselines.data_sources.csv_data_source.CSVDataSource
+  # Change this to point to the correct CSV file for the model being evaluated
+  #path: "/Volumes/T9/all_results/rq1-embeddings/filepaths/lca/results_2026-03-11_12-59-04_qwen3.csv"
+  path: "/Volumes/T9/all_results/rq2-llms/lca/base/qwen32/qwen-agent_qwen2.5-coder-32b-16k_rerank_test/results.csv"
+
+run_suffix: "_qwen32b"
+topk: 20
