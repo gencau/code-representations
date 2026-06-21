@@ -100,7 +100,7 @@ class OllamaRankBackbone(BaseBackbone):
             n_user = self._tokenizer.count_text_tokens(user_prompt_template.format(issue=issue, files=f))
             if n_sys + n_user > max_tokens:
                 f = self._tokenizer._truncate(f, max_tokens - n_sys)
-                print(f"WARNING: File content truncated to fit in context.")
+                print("WARNING: File content truncated to fit in context.")
             truncated_files.append(f)
 
         # Determine how many files fit in one context window
