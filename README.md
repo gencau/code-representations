@@ -199,7 +199,7 @@ python src/baselines/combine_representations.py \
 
 ---
 
-## Analysis & Utilities
+## Discussion
 
 ### UpSet Plot — Localized Files by Method
 
@@ -236,7 +236,7 @@ python utils/summaries_to_embeddings.py \
 
 ## Results & Databases
 
-Due to their size, results and ChromaDB databases are hosted separately on Zenodo.
+Due to their size, results and ChromaDB databases are hosted separately on Figshare.
 
 | Artifact | Location |
 |---|---|
