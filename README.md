@@ -1,144 +1,244 @@
 # On the Role of Retrieval-Oriented Code Representations in Agentic Bug Localization
-The task is: given an issue with the bug description and the repository code in the state where the issue is reproducible, identify the files within the project that need to be modified to address the reported bug.
 
-## Install Dependencies
-We provide dependencies for the pip dependency manager, so please run the following command to install all the required packages in each subdirectory:
+> **Task:** Given a bug report and a repository in the state where the issue is reproducible, identify the files that need to be modified to address the reported bug.
 
+---
+
+## Table of Contents
+
+- [Setup](#setup)
+- [Datasets](#datasets)
+- [RQ1 — Traditional Retrievers](#rq1--repository-representation-and-traditional-retrievers)
+- [RQ2 — LLM-based Retrieval](#rq2--llm-based-retrieval)
+- [RQ3 — Post-retrieval Ranking](#rq3--post-retrieval-ranking)
+- [Combining Results](#combining-results)
+- [Analysis & Utilities](#analysis--utilities)
+- [Results & Databases](#results--databases)
+
+---
+
+## Setup
+
+Install dependencies for each subdirectory using:
+
+```bash
 pip install -r requirements.txt
+```
 
-## Datasets 
-Data for both datasets is available in HuggingFace: 
+---
 
-- Long Code Arena (LCA): https://huggingface.co/datasets/JetBrains-Research/lca-bug-localization
-- SWE-bench Verified (SWE): https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified
+## Datasets
 
-## RQ1 Repository Representation and Traditional Retrievers
+Both datasets are available on HuggingFace:
 
-### BM25:
-All scripts for BM25 are located under bm25.
+| Dataset | Link |
+|---|---|
+| Long Code Arena (LCA) | [JetBrains-Research/lca-bug-localization](https://huggingface.co/datasets/JetBrains-Research/lca-bug-localization) |
+| SWE-bench Verified (SWE) | [princeton-nlp/SWE-bench_Verified](https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified) |
 
-- Follow instructions on how to install Pyserini: https://github.com/castorini/pyserini.
-- Configure your running environment in bug_localization/configs/baselines/bm25.yaml.
-- Run with src/baselines/run_bm25.py (for LCA) or src/baselines/run_bm25_swe.py (for SWE-bench Verified).
-- Compute metrics: src/baselines/metrics/compute_metrics_bm25.py
+---
 
-### Embeddings Retrieval
+## RQ1 — Repository Representation and Traditional Retrievers
 
-#### For Raw-Sources retrieval
-Scripts are located under embeddings-raw-sources.
+### BM25
 
-The databases with all embeddings for LCA and SWE are located under databases/embeddings.
+Scripts are located under `bm25/`. Requires [Pyserini](https://github.com/castorini/pyserini).
 
-Usage: 
+1. Install Pyserini following the instructions at the link above.
+2. Configure your environment in `bug_localization/configs/baselines/bm25.yaml`.
+3. Run retrieval:
+   - LCA: `python src/baselines/run_bm25.py`
+   - SWE: `python src/baselines/run_bm25_swe.py`
+4. Compute metrics: `python src/baselines/metrics/compute_metrics_bm25.py`
 
-rag_pipeline.py rag_pipeline.py --repo_path \<repos_directory\> --embed_location \<directory where to store the embeddings database\>
+---
 
-Example:
-- For LCA: python rag_pipeline.py —datasets=lca —repo_paths=\<path to lca sources\> —embed_location=\<path to embeddings\>
-- For SWE: python rag_pipeline.py --datasets=swe_verified --dataset_paths=\<path to parquet file\>  --repo_path=\<path to swe verified sources\> --embed_location=\<path to embeddings\>
+### Embedding Retrieval
 
+#### Raw Sources
 
-#### All other representations
-Script are located under embeddings-all/.
+Scripts are located under `embeddings-raw-sources/`. Pre-built embedding databases for LCA and SWE are available under `databases/embeddings/`.
 
-Process of adding summaries for an embedding model
+```bash
+# LCA
+python rag_pipeline.py --datasets=lca --repo_paths=<path to lca sources> --embed_location=<path to embeddings>
 
-We use models from hugging face.
-- Set the path to where you want the database in rag_pipeline.py
-- Set the model you want in record_processor
-- Run: python rag_pipeline.py --datasets=lca --repo_paths=\<path to repo\>
-- A results file is generated in the results folder with a timestamp.
-- Run python compute_metrics.py --input=results/results_file_name.csv (use the one under llm-embeddings)
+# SWE
+python rag_pipeline.py --datasets=swe_verified --dataset_paths=<path to parquet file> --repo_path=<path to swe sources> --embed_location=<path to embeddings>
+```
 
-Once summaries are generated, we can reuse them from the database to generate new embeddings for other models:
-- Run: python summaries_to_embeddings.py --source-chroma-path \<database that has the summaries\> —output-chroma-path \<path where to store the new embeddings\> --model \<hugging face model name\> —batch_size \<specify if the default 32 is too much. For Qwen3, 8 is best\>
-- Run: python rag_pipeline.py —datasets=lca --repo_paths=\<path to repo\> —no_add
-- A results file is generated in the results folder with a timestamp.
-- Run python compute_metrics.py --input=results/results_file_name.csv
+#### All Other Representations
 
-Extracting the summaries to file for BM25
+Scripts are located under `embeddings-all/`.
 
-- Run python summaries_to_file.py --dataset_name \<lca or swe\> —chroma_path \<database that has the summaries\> —output_dir \<path to where summaries will be written to files\> 
-- From the bm25 project, edit the bm25.yaml file to have the index_location point to where the files were copied (root path). Edit the run_suffix to control the path where the results file will be stored (under the output folder).
-- Run python run_bm25.py
-- Run python metrics/compute_metrics_bm25.py —input \<path to results file\> —topk=5
+**Adding summaries for an embedding model** (models loaded from HuggingFace):
 
-## RQ2: LLM-based Retrieval
+```bash
+# 1. Generate summaries and embeddings
+python rag_pipeline.py --datasets=lca --repo_paths=<path to repo>
+# → Results saved to results/ with a timestamp
 
-All scripts for raw sources and summary-based prompting are located under rq2/summaries.
+# 2. Compute metrics
+python compute_metrics.py --input=results/<results_file>.csv
 
-All scripts for file paths prompting are located under rq2/file-paths.
+# 3. Reuse summaries for a new embedding model
+python summaries_to_embeddings.py \
+  --source-chroma-path <database with summaries> \
+  --output-chroma-path <output path> \
+  --model <huggingface model name> \
+  --batch_size <batch size>   # default 32; use 8 for Qwen3
 
-Our 3 models using a 16K context window can be re-created in Ollama by using the configuration files located under bug_localization/src/modelfiles: ollama create -f \<path to modelfile\>
+# 4. Run pipeline (no re-indexing)
+python rag_pipeline.py --datasets=lca --repo_paths=<path to repo> --no_add
 
-For file paths representation:
-- Configure bug_localization/config/qwen2.3-coder.yaml for LCA, and swe-bench-chat.yaml for SWE
-- Run src/baselines/run_baselines.py (LCA), run_baseline_swe.py (SWE)
+# 5. Compute metrics
+python compute_metrics.py --input=results/<results_file>.csv
+```
 
-For summaries:
-- Configure bug_localization/config/qwen-agent.yaml (LCA) and swe-agent.yaml (SWE)
-- Run src/baselines/run_agents.py (LCA) and src/baselines/run_agents_swe.py (SWE)
+**Extracting summaries to files for BM25:**
 
-Compute results with src/baselines/metrics/compute_metrics_llm.py
+```bash
+# 1. Export summaries
+python summaries_to_file.py \
+  --dataset_name <lca or swe> \
+  --chroma_path <database with summaries> \
+  --output_dir <output directory>
 
+# 2. Edit bm25.yaml: set index_location and run_suffix
 
-## RQ3: Post-retrieval Ranking
+# 3. Run BM25 and compute metrics
+python run_bm25.py
+python metrics/compute_metrics_bm25.py --input <results file> --topk=5
+```
 
-All scripts are located under rq3.
+---
 
-Configure the yaml files for File paths and summaries representations:
-- rank_from_results (LCA), rank_from_results_swe (SWE)
-- Set the backbone type between: rank-w-filenames, rank-w-summaries, rank-w-bug-reports
-- Set the retriever database location, for summaries
-- Set the prompt target depending on the experiment type: 
-    - AgentContextPrompt: rank-w-filenames
-    - AgentSummaryPrompt: rank-w-summaries (any summary except bug report summaries)
-    - AgentBugSummaryPrompt: rank-w-bug-reports
+## RQ2 — LLM-based Retrieval
 
-- Set the datasource path to the results .csv file you want to rank.
-- Set the proper configuration file to use in src/baselines/run_rank_from_results.py
+Our three models use a 16K context window and can be recreated in Ollama using the modelfiles under `bug_localization/src/modelfiles/`:
 
-* Run: python src/baselines/run_rank_from_results.py
-* Compute results by running src/baseline/metrics/compute_metrics_ranked.py with max_k=5.
+```bash
+ollama create -f <path to modelfile>
+```
 
-Configure the yaml files for the raw sources representation:
-- rank_from_results_rawcode (LCA), rank_from_results_rawcode_swe (SWE)
-- Set the backbone type to rank-w-sources
-- Set the prompt target to AgentCodePrompt
-- Set the datasource_results path to the results .csv file you want to rank.
-- Set the proper configuration file to use in src/baselines/run_rank_from_results_rawcode.py
+### File Paths Representation
 
-* Run: python src/baselines/run_rank_from_results_rawcode.py
-* Compute results with src/baseline/metrics/compute_metrics_ranked.py with max_k=5.
+Scripts are located under `rq2/file-paths/`.
+
+```bash
+# Configure
+#   LCA: bug_localization/config/qwen2.3-coder.yaml
+#   SWE: bug_localization/config/swe-bench-chat.yaml
+
+# Run
+python src/baselines/run_baselines.py      # LCA
+python src/baselines/run_baseline_swe.py   # SWE
+```
+
+### Summaries Representation
+
+Scripts are located under `rq2/summaries/`.
+
+```bash
+# Configure
+#   LCA: bug_localization/config/qwen-agent.yaml
+#   SWE: bug_localization/config/swe-agent.yaml
+
+# Run
+python src/baselines/run_agents.py       # LCA
+python src/baselines/run_agents_swe.py   # SWE
+```
+
+Compute results with `src/baselines/metrics/compute_metrics_llm.py`.
+
+---
+
+## RQ3 — Post-retrieval Ranking
+
+Scripts are located under `rq3/`.
+
+### File Paths, Summaries, and Bug Report Representations
+
+```bash
+# Configure rank_from_results.yaml (LCA) or rank_from_results_swe.yaml (SWE):
+#   backbone_type:    rank-w-filenames | rank-w-summaries | rank-w-bug-reports
+#   prompt_target:    AgentContextPrompt   (filenames)
+#                     AgentSummaryPrompt   (summaries)
+#                     AgentBugSummaryPrompt (bug reports)
+#   datasource_path:  path to results .csv file
+
+python src/baselines/run_rank_from_results.py
+python src/baseline/metrics/compute_metrics_ranked.py --max_k=5
+```
+
+### Raw Sources Representation
+
+```bash
+# Configure rank_from_results_rawcode.yaml (LCA) or rank_from_results_rawcode_swe.yaml (SWE):
+#   backbone_type:   rank-w-sources
+#   prompt_target:   AgentCodePrompt
+#   datasource_results: path to results .csv file
+
+python src/baselines/run_rank_from_results_rawcode.py
+python src/baseline/metrics/compute_metrics_ranked.py --max_k=5
+```
+
+---
 
 ## Combining Results
 
-Under rq2/raw-sources_summaries: combine_representations.py. Only rrf method is used.
+Scripts are located under `rq2/raw-sources_summaries/`. Only RRF fusion is supported.
 
-Example:
-python src/baselines/combine_representations.py --results_list=\<comma-separated list of different representations\> --topk=5 --method=rrf --output=\<output_path\>
+```bash
+python src/baselines/combine_representations.py \
+  --results_list=<comma-separated list of result files> \
+  --topk=5 \
+  --method=rrf \
+  --output=<output path>
+```
 
-## Analysis of localized files by different methods (for UpSet plot generation)
-Scripts located under rq2/raw-sources_summaries.
+---
 
-Example:
-python utils/found_files_analysis.py --data-paths=\<comma-separated list of different representations for a single retriever\> --topk=5
+## Analysis & Utilities
 
+### UpSet Plot — Localized Files by Method
 
-## Computing Representation Footprint
-Scripts located under rq2/raw-sources_summaries.
+```bash
+python utils/found_files_analysis.py \
+  --data-paths=<comma-separated result files for a single retriever> \
+  --topk=5
+```
 
-Example for LCA:
+### Representation Footprint
 
-python src/baselines/count_input_tokens.py --source hf --hub_name tiginamaria/bug-localization --repos_dir \<path to repos\> --configs py java kt --split test --output \<output location\>
+```bash
+# LCA example
+python src/baselines/count_input_tokens.py \
+  --source hf \
+  --hub_name tiginamaria/bug-localization \
+  --repos_dir <path to repos> \
+  --configs py java kt \
+  --split test \
+  --output <output location>
+```
 
-## Computing Indexing Times
-Scripts located under rq2/raw-sources_summaries.
+### Indexing Times
 
-python utils/summaries_to_embeddings.py --collection=\<unique collection ID\> --source-chroma-path \<path to source database\> --output-chroma-path \<path to output database\> --model \<model huggingface name\>
+```bash
+python utils/summaries_to_embeddings.py \
+  --collection=<unique collection ID> \
+  --source-chroma-path <source database> \
+  --output-chroma-path <output database> \
+  --model <huggingface model name>
+```
 
-## Results
-All results can be found as a separate package in Zenodo, due to their size.
+---
 
-## Databases
-All generated chroma-db databases can be found as a separate package in Zenodo, due to their size.
+## Results & Databases
+
+Due to their size, results and ChromaDB databases are hosted separately on Zenodo.
+
+| Artifact | Location |
+|---|---|
+| All results (`.csv`) | Figshare (see paper for link) |
+| ChromaDB databases | Figshare (see paper for link) |
