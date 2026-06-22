@@ -75,29 +75,5 @@
                 "--output","${workspaceFolder}/results/rq2/rrf_raw_path_swe_32b",
             ]
         },
-        {
-            "name": "Run ranker with config",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/bug_localization/src/baselines/run_rank_from_results.py",
-            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/bug_localization"
-            },
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Run code ranker with config",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/bug_localization/src/baselines/run_rank_from_results_rawcode.py",
-            "python": "${workspaceFolder}/bug_localization/venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/bug_localization"
-            },
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
-        }
     ]
 }
