@@ -7,13 +7,12 @@
 ## Table of Contents
 
 - [Setup](#setup)
-- [Datasets](#datasets)
+- [Datasets, Results & Generated Databases](#datasets-results--generated-databases)
 - [RQ1 — Traditional Retrievers](#rq1--repository-representation-and-traditional-retrievers)
 - [RQ2 — LLM-based Retrieval](#rq2--llm-based-retrieval)
 - [RQ3 — Post-retrieval Ranking](#rq3--post-retrieval-ranking)
 - [Combining Results](#combining-results)
 - [Analysis & Utilities](#analysis--utilities)
-- [Results & Databases](#results--databases)
 
 ---
 
@@ -27,7 +26,7 @@ pip install -r requirements.txt
 
 ---
 
-## Datasets
+## Datasets, results & generated databases
 
 Both datasets are available on HuggingFace:
 
@@ -35,6 +34,22 @@ Both datasets are available on HuggingFace:
 |---|---|
 | Long Code Arena (LCA) | [JetBrains-Research/lca-bug-localization](https://huggingface.co/datasets/JetBrains-Research/lca-bug-localization) |
 | SWE-bench Verified (SWE) | [princeton-nlp/SWE-bench_Verified](https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified) |
+
+
+### Ready-to-Use Data
+Alternatively, you will also find all repositories checked out at each task's commit SHA, all generated databases and all results [here](https://huggingface.co/buckets/gencau/code-representations) (>200GB of data, but takes several days to generate):
+- lca_rawsources.zip: Long Code Arena raw source files.
+- swe_rawsources.zip: SWE-bench Verified raw source files.
+- all_results.zip: all our results, organized by RQ.
+- BM25-summaries.zip: All repositories with raw source files replaced with their generated summaries, with BM25 indexes.
+- chromadb*.zip: ChromaDB databases from raw source files, for each studied dense embedding.
+- File paths: All dense embeddings generated for file paths (project structure).
+- Summaries: All dense embeddings generated for all summary types.
+
+Note the following mapping between paper/data summaries:
+- prompt2: role-aware summary
+- prompt3: detailed technical summary
+- queries: generated bug reports
 
 ---
 
@@ -231,14 +246,3 @@ python utils/summaries_to_embeddings.py \
   --output-chroma-path <output database> \
   --model <huggingface model name>
 ```
-
----
-
-## Results & Databases
-
-Due to their size, results and ChromaDB databases are hosted separately on Figshare.
-
-| Artifact | Location |
-|---|---|
-| All results (`.csv`) | Figshare (see paper for link) |
-| ChromaDB databases | Figshare (see paper for link) |
