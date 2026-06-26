@@ -1,4 +1,4 @@
-# On the Role of Retrieval-Oriented Code Representations in Agentic Bug Localization
+# Retrieval-Oriented Code Representations in Agentic Bug Localization
 
 > **Task:** Given a bug report and a repository in the state where the issue is reproducible, identify the files that need to be modified to address the reported bug.
 
