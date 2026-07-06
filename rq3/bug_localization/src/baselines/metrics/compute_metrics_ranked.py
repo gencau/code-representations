@@ -52,12 +52,6 @@ def calculateResults(column: str,
         k_eff = min(k(row), len(dedup))
         return dedup[: k_eff]
 
-    # single‑row metrics ----------------------------------------------------
-    df[f'precision@2{column_suffix}'] = df.apply(
-        lambda r: metrics.compute_precision_at_2_single(r[gt_column],
-                                                        preds(r)),
-        axis=1
-    )
     df[f'precision@k{column_suffix}'] = df.apply(
         lambda r: metrics.compute_precision_at_k(r[gt_column],
                                                  preds(r),
@@ -146,7 +140,6 @@ def calculateResults(column: str,
     sf_mrr = sf_subset['MRR'].dropna().mean()
 
     # Multiple-file benchmark
-    mf_p2 = mf_subset['precision@2'+column_suffix].dropna().mean()
     mf_pk = mf_subset['precision@k'+column_suffix].dropna().mean()
     mf_r2 = mf_subset['recall@2'+column_suffix].dropna().mean()
     mf_ap = mf_subset['MAP'+column_suffix].dropna().mean()
@@ -197,7 +190,6 @@ def calculateResults(column: str,
     print("Overall Average k:", sf_average_k)
 
     print("---- Multi-file bugs ----")
-    print(f"Overall Precision@2{column_suffix}", mf_p2)
     print(f"Overall Precision@k{column_suffix}", mf_pk)
     print(f"Overall Recall@2{column_suffix}", mf_r2) 
     print(f"Overall Recall@k{column_suffix}", mf_r5)
