@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 from ast import literal_eval
-import metrics.metrics as metrics
+import src.baselines.metrics.classification_metrics as metrics
 
 def removeDuplicates(topk_files: list) -> list:
     # Deduplicate topk files list (predicted) as many chunks can match in the same file
