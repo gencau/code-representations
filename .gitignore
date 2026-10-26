@@ -186,3 +186,6 @@ ast_issues/
 output/
 run.*
 Bug difficulty analysis/
+
+# Results (hosted on Hugging Face, see README)
+all_results/
