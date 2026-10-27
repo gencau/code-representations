@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 
 from src.baselines.configs.baseline_configs import BaselineConfig
 from src.baselines.data_sources.base_data_source import BaseDataSource
-from src.baselines.metrics.classification_metrics import compute_precision_at_2_single,  \
+# Shared metric implementations live in code-representations/common/
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), *[os.pardir] * 6)))
+from common.classification_metrics import compute_precision_at_2_single,  \
     compute_recall_at_1_single, compute_recall_at_2_single, compute_average_precision, hit_rate_at_k, \
     all_files_in_predicted, compute_precision_at_k
 from src.utils.git_utils import parse_changed_files_from_diff

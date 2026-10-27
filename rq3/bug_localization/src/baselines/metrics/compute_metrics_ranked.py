@@ -2,9 +2,13 @@ import argparse
 import pandas as pd
 import numpy as np
 import math
+import sys
+from pathlib import Path
 
 from ast import literal_eval
-import src.baselines.metrics.classification_metrics as metrics
+# Shared metric implementations live in code-representations/common/
+sys.path.insert(0, str(Path(__file__).resolve().parents[5]))
+import common.classification_metrics as metrics
 
 def removeDuplicates(topk_files: list) -> list:
     # Deduplicate topk files list (predicted) as many chunks can match in the same file

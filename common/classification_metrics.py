@@ -147,30 +147,20 @@ def compute_average_precision(gt_files, predicted_files):
         float: Average Precision (AP) value, or np.nan if no ground-truth files.
     """
     if not gt_files:
-        return np.nan  # Undefined if no ground-truth files
+        return np.nan            # undefined if no ground truth
 
-    gt_files_set = set(gt_files)
-    num_relevant = len(gt_files_set)
-    if num_relevant == 0:
-        return np.nan  # Avoid division by zero
+    gt_set       = set(gt_files)
+    found        = set()         # relevant files already seen
+    sum_prec     = 0.0
 
-    hits = 0
-    sum_precisions = 0.0
+    for idx, pred in enumerate(predicted_files, start=1):
+        if pred in gt_set and pred not in found:
+            found.add(pred)
+            sum_prec += len(found) / idx
+            if len(found) == len(gt_set):     # all relevant files found
+                break
 
-    try:
-        for idx, pred in enumerate(predicted_files, start=1):
-            if pred in gt_files_set:
-                hits += 1
-                precision_at_k = hits / idx
-                sum_precisions += precision_at_k
-    except:
-        return 0.0
-
-    if hits == 0:
-        return 0.0
-
-    average_precision = sum_precisions / num_relevant
-    return average_precision
+    return sum_prec / len(gt_set)             # 0 if found is empty
 
 def compute_f1_score(precision, recall):
     """
@@ -232,7 +222,7 @@ def mean_reciprocal_rank(gt_files, predicted_files):
     for index, file in enumerate(predicted_files, start=1):
         if file in gt_files_set:
             return 1 / index
-    
+
     return 0
 
 def acc_at_k(gt_locations, predicted_locations, k=1):

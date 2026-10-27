@@ -1,12 +1,15 @@
 
 import argparse
 import os
+import sys
 import numpy as np
 import pandas as pd
 from ast import literal_eval
 from scipy.stats import binom, wilcoxon
 
-from metrics import metrics
+# Shared metric implementations live in code-representations/common/
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)))
+from common import classification_metrics as metrics
 
 index_column = "index"
 found_files_column = "topk_files"
