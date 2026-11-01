@@ -7,11 +7,12 @@ from src.baselines.backbones.agent.prompts.agent_prompt_templates import AGENT_C
 
 class AgentCodePrompt():
 
-    def get_base_prompt(self, issue):
-        return AGENT_CODE_PROMPT_TEMPLATE_2.format(issue, "")
-        
+    # AGENT_CODE_PROMPT_TEMPLATE_2 uses named placeholders ({issue}, {files})
+    def get_base_prompt(self, issue=""):
+        return AGENT_CODE_PROMPT_TEMPLATE_2.format(issue=issue, files="")
+
     def full_prompt(self, issue_description, project_content: str) -> str:
-        return AGENT_CODE_PROMPT_TEMPLATE_2.format(issue_description, project_content)
+        return AGENT_CODE_PROMPT_TEMPLATE_2.format(issue=issue_description, files=project_content)
     
     def get_system_prompt(self) -> str:
         return AGENT_SYSTEM_PROMPT_TEMPLATE

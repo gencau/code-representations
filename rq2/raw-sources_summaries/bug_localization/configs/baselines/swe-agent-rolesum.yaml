@@ -1,0 +1,30 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.model_name}_${backbone.experiment}
+  run:
+    dir: /Users/gen/workspace/emse_2027/code-representations/rq2/output/swe-bench/${hydra:job.name}${run_suffix} 
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  # Switch to a backbone implementation that uses the Ollama API.
+  _target_: src.baselines.backbones.agent.ollama_agent_backbone.OllamaAgentBackbone
+  name: swe-agent
+  # This is the model identifier as recognized by Ollama.
+  model_name: devstral-small-2-16k
+
+  prompt:
+    _target_: src.baselines.backbones.agent.prompts.agent_summary_prompt.AgentSummaryPrompt
+  retriever: 
+    _target_: src.baselines.backbones.agent.context.summary_retriever.SummaryRetriever
+    database_location: "/Volumes/T9/rq1/summaries/swe/prompt-variations/prompt2-gtelarge"
+  experiment: "rolesummaries"
+
+data_source:
+  _target_: src.baselines.data_sources.swe_bench_data_source.SWEDataSource 
+  repos_dir: /Volumes/T9/repos
+  cache_dir: null
+  hub_name: /Users/gen/workspace/SWE-bench/swebench/inference/hf_datasets/SWE-bench_Verified
+  split: test
+
+run_suffix: ""

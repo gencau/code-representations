@@ -7,14 +7,15 @@ from src.baselines.backbones.agent.prompts.agent_prompt_templates import AGENT_S
 
 class AgentContextPrompt():
 
-    def get_base_prompt(self):
-        return AGENT_CONTEXT_PROMPT_TEMPLATE.format("")
-    
+    # AGENT_CONTEXT_PROMPT_TEMPLATE has two slots here (issue, files), unlike the file-paths copy
+    def get_base_prompt(self, issue=""):
+        return AGENT_CONTEXT_PROMPT_TEMPLATE.format(issue, "")
+
     def get_issue_prompt(self, issue_description: str) -> str:
-        return AGENT_CONTEXT_PROMPT_TEMPLATE.format(issue_description)
-    
+        return self.get_base_prompt(issue_description)
+
     def full_prompt(self, issue_description, project_content: str) -> str:
-        return self.get_issue_prompt(issue_description) + '\n' + AGENT_CONTEXT_PROMPT_TEMPLATE.format(project_content)
+        return AGENT_CONTEXT_PROMPT_TEMPLATE.format(issue_description, project_content)
 
     def get_fixed_prompt(self, issue_description: str) -> str:
         return self.get_issue_prompt(issue_description)

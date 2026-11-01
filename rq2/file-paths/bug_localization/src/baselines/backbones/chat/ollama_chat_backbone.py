@@ -35,10 +35,14 @@ class OllamaChatBackbone(BaseBackbone):
 
     def get_response(self, messages: List[ChatMessage], max_tokens: int=150):
         prompt = self.build_chat_message(messages)
+        # Ollama only reads sampling parameters from "options"; top-level keys are ignored.
+        options = {"temperature": self._parameters.get("temperature", 0.0)}
+        if "seed" in self._parameters:
+            options["seed"] = self._parameters["seed"]
         payload = {
             "model": self._model_name,
             "prompt": prompt,
-            "temperature": self._parameters.get("temperature", 0.0),
+            "options": options,
         }
 
         url = f"{self._ollama_endpoint}/api/generate"

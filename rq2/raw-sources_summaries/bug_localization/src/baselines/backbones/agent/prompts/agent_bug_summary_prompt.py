@@ -6,7 +6,8 @@ from src.baselines.backbones.agent.prompts.agent_bug_summary_prompt_templates im
 
 class AgentBugSummaryPrompt(AgentContextPrompt):
 
-    def get_base_prompt(self):
+    # The backbone calls get_base_prompt(""); the argument is unused
+    def get_base_prompt(self, issue=""):
         return AGENT_BUG_REPORT_PROMPT_TEMPLATE
         
     def full_prompt(self, issue_description, project_content: str) -> str:

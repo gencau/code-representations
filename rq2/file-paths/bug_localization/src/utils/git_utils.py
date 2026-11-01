@@ -140,6 +140,10 @@ def get_repo_content_on_commit(repo_path: str, commit_sha: str,
     repo = git.Repo(repo_path)
     # Temporarily disable hooks (needed to disable LFS hooks)
     repo.git.config('core.hooksPath', '/dev/null')
+    # exFAT does not keep permissions or stable stat info, so git otherwise rewrites every file on checkout
+    repo.git.config('core.fileMode', 'false')
+    repo.git.config('core.trustctime', 'false')
+    repo.git.config('core.checkStat', 'minimal')
     repo.git.checkout(commit_sha, f=True)
     commit = repo.commit(commit_sha)
 

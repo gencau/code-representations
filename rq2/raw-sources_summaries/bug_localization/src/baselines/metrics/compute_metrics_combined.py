@@ -9,6 +9,7 @@ from ast import literal_eval
 # Shared metric implementations live in code-representations/common/
 sys.path.insert(0, str(Path(__file__).resolve().parents[6]))
 import common.classification_metrics as metrics
+import common.metrics_summary as summary_tables
 
 def removeDuplicates(final_files: list) -> list:
     # Deduplicate topk files list (predicted) as many chunks can match in the same file
@@ -111,6 +112,25 @@ def calculateResults(column: str,
                                                preds(r)),
         axis=1
     )
+    df[f'{column_prefix}hit_rate@1{column_suffix}'] = df.apply(
+        lambda r: metrics.hit_rate_at_k(r[results_row],
+                                        preds(r),
+                                        k=1),
+        axis=1
+    )
+    df[f'{column_prefix}hit_rate@3{column_suffix}'] = df.apply(
+        lambda r: metrics.hit_rate_at_k(r[results_row],
+                                        preds(r),
+                                        k=3),
+        axis=1
+    )
+    df[f'{column_prefix}Acc@k{column_suffix}'] = df.apply(
+        lambda r: metrics.acc_at_k(r[results_row],
+                                   preds(r),
+                                   k=k(r)),
+        axis=1
+    )
+    df[f'{column_prefix}n_preds{column_suffix}'] = df.apply(lambda r: len(preds(r)), axis=1)
 
     sf_subset = df[df[column_prefix+'recall@1'+column_suffix].notna()]
     for _, row in sf_subset.iterrows():
@@ -218,7 +238,11 @@ def calculateResults(column: str,
     print(f"Overall hit@k {column_suffix}: {all_hitk}")
     print(f"Overall MAP {column_suffix}: {all_map}")
 
-def computeMetrics(outfile: str, percent: int, topk: int, bm25: bool):
+    return summary_tables.summarize_splits(df, results_row, column_prefix, column_suffix)
+
+def computeMetrics(outfile: str, percent: int, topk: int, bm25: bool,
+                   output: str, summary_file: str = None, labels: dict = None):
+    summary_tables.check_output(outfile, output)
     # Note: uncomment all files if using dependencies
     data = pd.read_csv(outfile,
                        converters={
@@ -246,13 +270,13 @@ def computeMetrics(outfile: str, percent: int, topk: int, bm25: bool):
     print(df[['fused_results', 'top_k']].head())   # sanity‑check
     print(df['fused_results'][0])
 
+    # BM25 results name the ground truth 'changed_files', embedding results 'expected_files'
     results_row = 'expected_files'
-    if bm25 == True:
+    if bm25 or 'expected_files' not in df:
         results_row = 'changed_files'
-        
 
     # ---- compute metrics -------------------------------------------------
-    calculateResults('fused_results', results_row, df, 'top_k')
+    summary = calculateResults('fused_results', results_row, df, 'top_k')
 
     # Note: uncomment all files if using dependencies
     #df['top_k'] = df['all_files'].apply(len)
@@ -264,7 +288,12 @@ def computeMetrics(outfile: str, percent: int, topk: int, bm25: bool):
 
 
     # ---- persist ---------------------------------------------------------
-    df.to_csv(outfile, index=False)
+    labels = labels or {}
+    summary_tables.save_results(df, output, results_row, labels)
+
+    if summary_file:
+        k_label = str(topk) if topk > 0 else (f"{percent}%" if percent > 0 else "all")
+        summary_tables.upsert_summary(summary_file, summary, labels, k_label)
 
 
 def main() -> None:
@@ -272,10 +301,14 @@ def main() -> None:
     parser.add_argument("--input",   required=True)
     parser.add_argument("--percent", type=int, default=0)
     parser.add_argument("--topk", type=int, default=5)
-    parser.add_argument("--bm25", type=bool, default=False)
+    parser.add_argument("--bm25", type=bool, default=False,
+                        help="Force changed_files as ground truth (otherwise detected from the columns)")
+    summary_tables.add_output_arguments(parser)
 
     args = parser.parse_args()
-    computeMetrics(args.input, args.percent, args.topk, args.bm25)
+    computeMetrics(args.input, args.percent, args.topk, args.bm25,
+                   output=args.output, summary_file=args.summary,
+                   labels=summary_tables.labels_from_args(args))
 
 
 if __name__ == "__main__":

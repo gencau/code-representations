@@ -15,7 +15,7 @@ from configs.baseline_configs import BaselineConfig
 from data_sources.base_data_source import BaseDataSource
 
 
-@hydra.main(version_base="1.1", config_path="../../configs/baselines", config_name="swe-agent")
+@hydra.main(version_base="1.1", config_path="../../configs/baselines", config_name="swe-agent-rolesum")
 def main(cfg: BaselineConfig) -> None:
     os.environ['HYDRA_FULL_ERROR'] = '1'
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

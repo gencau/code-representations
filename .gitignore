@@ -189,3 +189,5 @@ Bug difficulty analysis/
 
 # Results (hosted on Hugging Face, see README)
 all_results/
+all_results_full/
+all_results_superseded/

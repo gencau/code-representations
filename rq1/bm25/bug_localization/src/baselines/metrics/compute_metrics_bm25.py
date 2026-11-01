@@ -9,6 +9,7 @@ from ast import literal_eval
 # Shared metric implementations live in code-representations/common/
 sys.path.insert(0, str(Path(__file__).resolve().parents[6]))
 import common.classification_metrics as metrics
+import common.metrics_summary as summary_tables
 
 def removeDuplicates(final_files: list) -> list:
     # Deduplicate topk files list (predicted) as many chunks can match in the same file
@@ -100,6 +101,19 @@ def calculateResults(column: str,
                                         k=k(r)),
         axis=1
     )
+    df[f'{column_prefix}hit_rate@1{column_suffix}'] = df.apply(
+        lambda r: metrics.hit_rate_at_k(r['changed_files'],
+                                        preds(r),
+                                        k=1),
+        axis=1
+    )
+    df[f'{column_prefix}hit_rate@3{column_suffix}'] = df.apply(
+        lambda r: metrics.hit_rate_at_k(r['changed_files'],
+                                        preds(r),
+                                        k=3),
+        axis=1
+    )
+    df[f'{column_prefix}n_preds{column_suffix}'] = df.apply(lambda r: len(preds(r)), axis=1)
     df[f'{column_prefix}all_files_predicted{column_suffix}'] = df.apply(
         lambda r: metrics.all_files_in_predicted(r['changed_files'],
                                                  preds(r)),
@@ -226,7 +240,11 @@ def calculateResults(column: str,
     print(f"Overall MAP {column_suffix}: {all_map}")
     print(f"Overall Acc@k {column_suffix}: {all_acck}")
 
-def computeMetrics(outfile: str, percent: int, topk: int):
+    return summary_tables.summarize_splits(df, 'changed_files', column_prefix, column_suffix)
+
+def computeMetrics(outfile: str, percent: int, topk: int,
+                   output: str, summary_file: str = None, labels: dict = None):
+    summary_tables.check_output(outfile, output)
     # Note: uncomment all files if using dependencies
     data = pd.read_csv(outfile,
                        converters={
@@ -254,7 +272,7 @@ def computeMetrics(outfile: str, percent: int, topk: int):
     print(df['final_files'][0])
 
     # ---- compute metrics -------------------------------------------------
-    calculateResults('final_files', df, k_col='top_k')
+    summary = calculateResults('final_files', df, k_col='top_k')
 
     # Note: uncomment all files if using dependencies
     #df['top_k'] = df['all_files'].apply(len)
@@ -266,7 +284,12 @@ def computeMetrics(outfile: str, percent: int, topk: int):
 
 
     # ---- persist ---------------------------------------------------------
-    df.to_csv(outfile, index=False)
+    labels = labels or {}
+    summary_tables.save_results(df, output, 'changed_files', labels)
+
+    if summary_file:
+        k_label = str(topk) if topk > 0 else (f"{percent}%" if percent > 0 else "all")
+        summary_tables.upsert_summary(summary_file, summary, labels, k_label)
 
 
 def main() -> None:
@@ -274,9 +297,12 @@ def main() -> None:
     parser.add_argument("--input",   required=True)
     parser.add_argument("--percent", type=int, default=0)
     parser.add_argument("--topk", type=int, default=0)
+    summary_tables.add_output_arguments(parser)
 
     args = parser.parse_args()
-    computeMetrics(args.input, args.percent, args.topk)
+    computeMetrics(args.input, args.percent, args.topk,
+                   output=args.output, summary_file=args.summary,
+                   labels=summary_tables.labels_from_args(args))
 
 
 if __name__ == "__main__":

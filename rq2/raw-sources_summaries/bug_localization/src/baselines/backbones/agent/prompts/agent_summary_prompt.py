@@ -7,7 +7,7 @@ from src.baselines.backbones.agent.prompts.agent_prompt_templates import AGENT_S
 
 class AgentSummaryPrompt():
 
-    def get_base_prompt(self, issue):
+    def get_base_prompt(self, issue=""):
         return AGENT_SUMMARY_PROMPT_TEMPLATE.format(issue, "")
         
     def full_prompt(self, issue_description, project_content: str) -> str:

@@ -48,6 +48,7 @@ class TokenizationUtils:
         "codellama-7b-16k": {"model_provider": "meta", "model_name": "codellama", "context_size": 16384},
         "codellama-13b-8k": {"model_provider": "meta", "model_name": "codellama", "context_size": 8192},
         "codellama-13b-16k": {"model_provider": "meta", "model_name": "codellama", "context_size": 16384},
+        "devstral-small-2-16k": {"model_provider": "meta", "model_name": "devstral-small-2", "context_size": 16384},
     }
 
     def __init__(self, profile_name: str):

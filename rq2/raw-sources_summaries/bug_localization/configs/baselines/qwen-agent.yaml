@@ -14,15 +14,15 @@ backbone:
   model_name: qwen2.5-coder-7b-16k
 
   prompt:
-    #_target_: src.baselines.backbones.agent.prompts.agent_context_prompt.AgentContextPrompt
-    _target_: src.baselines.backbones.agent.prompts.agent_summary_prompt.AgentSummaryPrompt
+    _target_: src.baselines.backbones.agent.prompts.agent_context_prompt.AgentContextPrompt
+    #_target_: src.baselines.backbones.agent.prompts.agent_summary_prompt.AgentSummaryPrompt
   
   retriever: 
     _target_: src.baselines.backbones.agent.context.summary_retriever.SummaryRetriever
-    database_location: "/Volumes/T9/rq1/summaries/prompt-variations/prompt3-gtelarge"
-    #database_location: "/Volumes/T9/rq1/summaries/prompt-variations/prompt2-gtelarge"
+    #database_location: "/Volumes/T9/rq1/summaries/prompt-variations/prompt3-gtelarge"
+    database_location: "/Volumes/T9/rq1/summaries/prompt-variations/prompt2-gtelarge"
     #database_location: "/Volumes/T9/rq1/summaries/queries/file-level/report3/temp0/all/queries_5_test_gtelarge"
-  experiment: iterative
+  experiment: project-structure
 
 data_source:
   _target_: src.baselines.data_sources.hf_data_source.HFDataSource

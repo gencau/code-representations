@@ -142,17 +142,19 @@ Scripts are located under `rq2/file-paths/`.
 
 ```bash
 # Configure
-#   LCA: bug_localization/config/qwen2.3-coder.yaml
-#   SWE: bug_localization/config/swe-bench-chat.yaml
+#   LCA: bug_localization/config/qwen-agent.yaml
+#   SWE: bug_localization/config/swe-agent.yaml
 
 # Run
-python src/baselines/run_baselines.py      # LCA
-python src/baselines/run_baseline_swe.py   # SWE
+python src/baselines/run_agents.py      # LCA
+python src/baselines/run_agents_swe.py   # SWE
 ```
+
+Compute results with `src/baselines/metrics/compute_metrics_llm.py`.
 
 ### Summaries Representation
 
-Scripts are located under `rq2/summaries/`.
+Scripts are located under `rq2/raw-sources_summaries/`.
 
 ```bash
 # Configure

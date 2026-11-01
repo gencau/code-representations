@@ -34,8 +34,18 @@ def main(cfg: BaselineConfig) -> None:
     log_file = open(os.path.join(output_path, 'output.log'), 'w')
     sys.stdout = log_file
 
+    # Resume: skip data points already written to results.csv
+    done_ids = set()
+    if os.path.exists(results_csv_path):
+        csv.field_size_limit(sys.maxsize)
+        with open(results_csv_path, newline='') as f:
+            done_ids = {row['id'] for row in csv.DictReader(f)}
+        print(f"Resuming: {len(done_ids)} data points already in {results_csv_path}")
+
     # changed files is the ground truth
     for dp, repo_content, changed_files in data_src:
+        if str(dp['id']) in done_ids:
+            continue
         issue_description = dp['issue_title'] + '\n' + dp['issue_body']
         start_time = time.time()
         results_dict = backbone.localize_bugs(issue_description, repo_content, dp['base_sha'])

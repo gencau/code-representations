@@ -1,0 +1,29 @@
+hydra:
+  job:
+    name: ${backbone.name}_${backbone.model_name}_${backbone.experiment}
+  run:
+    dir: /Users/gen/workspace/emse_2027/code-representations/discussion/rq2_extension/output/${hydra:job.name}${run_suffix}
+  job_logging:
+    root:
+      handlers: [console, file]
+backbone:
+  # Agent backbone with file paths only, as in the Qwen 7B/14B/32B project-structure runs
+  # (long-context-experiments output/replication_*/lca/iterative).
+  _target_: src.baselines.backbones.agent.ollama_agent_backbone.OllamaAgentBackbone
+  name: devstral-agent
+  model_name: devstral-small-2-16k
+  prompt:
+    _target_: src.baselines.backbones.agent.prompts.agent_context_prompt.AgentContextPrompt
+  experiment: iterative
+data_source:
+  _target_: src.baselines.data_sources.hf_data_source.HFDataSource
+  repos_dir: /Volumes/T9/lca/cloned_repos
+  cache_dir: null
+  hub_name: tiginamaria/bug-localization
+  configs:
+    - py
+    - java
+    - kt
+  split: test
+
+run_suffix: "_paths"
